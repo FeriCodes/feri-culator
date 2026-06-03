@@ -1,0 +1,17 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+.venv/
+venv/
+ENV/
+
+# IDE Settings 
+.vscode/
+.idea/
+
+# Local history file 
+# CalHistory.json
