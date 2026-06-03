@@ -17,6 +17,7 @@ def show_menu():
     choice = input("Select an option (1-5): ")
     return choice
 
+
 def view_help():  # 4 calculator help in the menu
     print("\n" + "-" * 30)
     print("      FeriCulator HELP")
@@ -30,8 +31,10 @@ def view_help():  # 4 calculator help in the menu
     print("-" * 30)
     input("\nPress Enter to return...")
 
+
 def handle_exit():  # 5 exit the fericulate!
     print("Thank you for using Fericulator. Goodbye!")
+
 
 def main():
     print("wellocme to the FeriCulator")
@@ -56,18 +59,18 @@ def main():
 
                     result = calc_tools.calculate(n1, "sqrt")
                 
-                    full_record = f"sqrt {n1} = {result}"
+                    
                     print(f"\nResult: {result}")
 
-                    history_tools.save_calculation_to_history(full_record)
+                    history_tools.save_calculation_to_history(f"{n1} {op} {n2}", result)
 
                 elif result_type == "calc":
                     n1, op, n2 = data
 
                     result = calc_tools.calculate(n1, op, n2)
-                    full_record = f"{n1} {op} {n2} = {result}"
+                    
                     print(f"\nResult: {result}")
-                    history_tools.save_calculation_to_history(full_record)
+                    history_tools.save_calculation_to_history(f"sqrt {n1}", result)
             
         elif choice == "2":
             history_tools.view_history()

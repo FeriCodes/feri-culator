@@ -1,5 +1,8 @@
+import json
+import os
+from datetime import datetime
 class History:
-    def __init__(self, filename="CalHistory.txt"):
+    def __init__(self, filename="CalHistory.json"):
         self.filename = filename
 
     def view_history(self):
@@ -12,27 +15,40 @@ class History:
             print("No history found.")
         else:
             for item in history:
-                print(f"- {item}")
+                print(f"[{item['time']}] {item['expression']} = {item['result']}")
 
 
-    def save_calculation_to_history(self, full_record):
+    def save_calculation_to_history(self, expression, result):
+
+        history = self.get_history()
+        new_record = {
+            "expression": expression,
+            "result": result,
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+        history.append(new_record)
+
         try:
-            with open(self.filename, "a", encoding="utf-8") as file:
-                file.write(full_record + "\n")
+            with open(self.filename, "w", encoding="utf-8") as file:
+                json.dump(history, file, indent=4, ensure_ascii=False)
         except IOError:
             print("Error: Could not write to history file.")
 
 
     def get_history(self):
+        if not os.path.exists(self.filename):
+            return []
         try:
             with open(self.filename, "r", encoding="utf-8") as file:
-                return [line.strip() for line in file.readlines()]
-        except FileNotFoundError:
+                return json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
             return []  # if don't have a file return an empty list.
         
     def clear_history_file(self):
         try:
-            open(self.filename, "w", encoding="utf-8").close()
+            with open(self.filename, "w", encoding="utf-8") as file:
+                json.dump([], file)
         except IOError:
             print("Error: Could not clear history file.")
 
@@ -51,3 +67,4 @@ class History:
         print("\nClearing calculation history...")
         self.clear_history_file()
         print("History cleared!")
+    
