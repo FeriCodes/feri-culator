@@ -5,6 +5,9 @@ __pycache__/
 *.pyd
 
 
+# Local history file
+CalHistory.json
+
 .venv/
 venv/
 ENV/
