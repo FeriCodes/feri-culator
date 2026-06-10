@@ -31,7 +31,7 @@ class History:
     def save_calculation_to_history(self, expression, result):
         """
         Saves a calculation record to the history JSON file.
-        Each record includes the expression, result, and timestamp.
+        Each record includes the expression, result, and timestamp.له
         """
 
         history = self.get_history()
