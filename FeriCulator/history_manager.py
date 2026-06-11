@@ -61,7 +61,7 @@ class History:
         except (FileNotFoundError, json.JSONDecodeError):
             return []  # if don't have a file return an empty list.
 
-    def clear_history_file(self):
+    def clear_history(self):
         """
         Clears the history file by overwriting it with an empty list.
         """
@@ -71,18 +71,15 @@ class History:
         except IOError:
             print("Error: Could not clear history file.")
 
-    def clear_history(self):
+    def confirm_and_clear(self):
         """
         choice 3 in main manu for getting clear history.
         """
 
-        print("do you want to clear calculation history? (y/n): ")
-
-        confirm = input().strip().lower()
+        confirm = input("Do you want to clear history? (y/n):").strip().lower()
         if confirm != "y":
-            print("Operation cancelled. History not cleared.")
+            print("Operation cancelled.")
             return
 
-        print("\nClearing calculation history...")
         self.clear_history_file()
         print("History cleared!")
