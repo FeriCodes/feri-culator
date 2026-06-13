@@ -6,7 +6,6 @@ class CalculatorApp:
         self.root = root
         self.root.title("Feri Culator")
         self.root.geometry("350x450")
-
         self.display_label = tk.Label(
             self.root,
             text="0",
@@ -27,6 +26,9 @@ class CalculatorApp:
             "()", "0", ".", "="
         ]
         # fmt: on
+
+        # self.expression stores the current mathematical formula as a string
+        self.expression = ""
 
         self.create_buttons()
 
@@ -54,11 +56,24 @@ class CalculatorApp:
                 row_value += 1
 
     def on_button_click(self, char):
-
+        # Case 1: Clear everything if AC is pressed
         if char == "AC":
+            self.expression = ""
             self.display_label.configure(text="0")
+
+        # Case 2: Delete the last character if C is pressed (Backspace)
+        elif char == "C":
+            self.expression = self.expression[:-1]
+            if self.expression == "":
+                self.display_label.config(text="0")
+            else:
+                self.display_label.config(text=self.expression)
+
+        # Case 3: Append the number or operator to the expression
         else:
-            self.display_label.config(text=char)
+            self.expression += char
+            self.display_label.config(text=self.expression)
+
         print(f"You clicked: {char}")
 
 
