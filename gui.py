@@ -6,6 +6,8 @@ class CalculatorApp:
         self.root = root
         self.root.title("Feri Culator")
         self.root.geometry("350x450")
+        self.root.resizable(False, False)
+
         self.display_label = tk.Label(
             self.root,
             text="0",
@@ -14,7 +16,9 @@ class CalculatorApp:
             bg="#111111",
             fg="white",
         )
-        self.display_label.grid(row=0, column=0, columnspan=4, sticky="ew", pady=20)
+        self.display_label.grid(
+            row=0, column=0, columnspan=4, sticky="ew", padx=10, pady=20
+        )
         self.root.configure(bg="#111111")
 
         # fmt: off
@@ -41,14 +45,14 @@ class CalculatorApp:
                 self.root,
                 text=b_text,
                 font=("Arial", 14),
-                padx=20,
-                pady=20,
+                width=5,
+                height=2,
                 bg="#222222",
                 fg="white",
                 relief="flat",
                 command=lambda x=b_text: self.on_button_click(x),
             )
-            self.btn.grid(row=row_value, column=col_value)
+            self.btn.grid(row=row_value, column=col_value, padx=5, pady=5)
             col_value += 1
 
             if col_value == 4:
@@ -69,7 +73,15 @@ class CalculatorApp:
             else:
                 self.display_label.config(text=self.expression)
 
-        # Case 3: Append the number or operator to the expression
+        # Case 3: Display current expression when = is pressed
+        elif char == "=":
+            try:
+                if self.expression:
+                    self.display_label.config(text=self.expression)
+            except Exception:
+                self.display_label.config(text="Error")
+
+        # Case 4: Append the number or operator to the expression
         else:
             self.expression += char
             self.display_label.config(text=self.expression)
