@@ -14,7 +14,10 @@ class History:
     """
 
     def __init__(self, filename="CalHistory.json", max_records=50):
-        self.filename = filename
+
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        self.filename = os.path.join(base_dir, filename)
         self.max_records = max_records
 
     def get_history(self):
@@ -32,9 +35,8 @@ class History:
     def save_calculation_to_history(self, expression, result):
         """
         Saves a calculation record to the history JSON file.
-        Each record includes the expression, result, and timestamp.له
+        Each record includes the expression, result, and timestamp.
         """
-
         history = self.get_history()
         new_record = {
             "expression": expression,
@@ -55,7 +57,7 @@ class History:
 
     def clear_history(self):
         """
-        Clears the history file by overwriting it with an empty list.
+        Cleals the history file by overwriting it with an empty list.
         """
         try:
             with open(self.filename, "w", encoding="utf-8") as file:

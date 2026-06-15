@@ -5,11 +5,13 @@ from FeriCulator.history_manager import History
 
 
 class CalculatorApp:
+
     def __init__(self, root):
         self.root = root
         self.root.title("Feri Culator")
         self.root.geometry("350x490")
         self.root.resizable(False, False)
+        self.root.configure(bg="#111111")
 
         self.sci = ScientificCalculation()
         self.history_manager = History()
@@ -39,13 +41,12 @@ class CalculatorApp:
         self.display_label.grid(
             row=1, column=0, columnspan=4, sticky="ew", padx=10, pady=10
         )
-        self.root.configure(bg="#111111")
 
         # fmt: off
         self.standard_buttons = [
-            "AC", "C", "%", "/",
-            "7", "8", "9", "*",
-            "4", "5", "6", "-",
+            "AC", "C", "%", "÷",
+            "7", "8", "9", "×",
+            "4", "5", "6", "−",
             "1", "2", "3", "+",
             "SCI", "0", ".", "="
         ]
@@ -53,9 +54,9 @@ class CalculatorApp:
         self.scientific_buttons = [
             "sin", "cos", "tan", "cot",
             "fac", "π", "√", "log",
-            "AC", "C", "%", "/",
-            "7", "8", "9", "*",
-            "4", "5", "6", "-",
+            "AC", "C", "%", "÷",
+            "7", "8", "9", "×",
+            "4", "5", "6", "−",
             "1", "2", "3", "+",
             "STD","0", ".", "="
         ]
@@ -63,7 +64,6 @@ class CalculatorApp:
 
         # self.expression stores the current mathematical formula as a string
         self.expression = ""
-
         self.create_buttons()
 
     def toggle_mode(self):
@@ -88,15 +88,29 @@ class CalculatorApp:
         col_value = 0
 
         for b_text in buttons:
+            button_bg = "#222222"
+            button_fg = "white"
+
+            if b_text in ["AC", "C", "%"]:
+                button_fg = "#ff9f0a"
+
+            elif b_text in ["÷", "×", "−", "+", "=", "SCI", "STD"]:
+                button_fg = "#ff9f0a"
+
+            elif b_text in ["sin", "cos", "tan", "cot", "fac", "π", "√", "log"]:
+                button_fg = "#64ffda"
+
             btn = tk.Button(
                 self.root,
                 text=b_text,
-                font=("Arial", 14),
+                font=("Arial", 14, "bold"),
                 width=5,
                 height=2,
-                bg="#000000",
-                fg="white",
+                bg=button_bg,
+                fg=button_fg,
                 relief="flat",
+                activebackground="#333333",
+                activeforeground=button_fg,
                 command=lambda x=b_text: self.on_button_click(x),
             )
             btn.grid(row=row_value, column=col_value, padx=5, pady=5)
@@ -145,7 +159,9 @@ class CalculatorApp:
 
         def clear_action():
             if messagebox.askyesno(
-                "Clear History", "Do you want to clear history?", parent=hs_window
+                "Clear History",
+                "Do you want to clear history?",
+                parent=hs_window,
             ):
                 self.history_manager.clear_history()
                 hs_text.config(state="normal")
@@ -193,13 +209,16 @@ class CalculatorApp:
             try:
                 num = float(self.expression)
                 op_name = "sqrt" if char == "√" else char
-
                 result = self.sci.calculate(op_name, self.expression)
 
-                self.history_manager.save_calculation_to_history(
-                    f"{char}({num})", result
-                )
-                self.expression = str(result) if result != "Math Error" else ""
+                if result != "Math Error":
+                    self.history_manager.save_calculation_to_history(
+                        f"{char}({num})", result
+                    )
+                    self.expression = str(result)
+                else:
+                    self.expression = ""
+
                 self.display_label.config(text=str(result))
 
             except ValueError:
@@ -211,7 +230,14 @@ class CalculatorApp:
             if not self.expression:
                 return
             try:
-                result = eval(self.expression)
+                clean_expression = (
+                    self.expression.replace("÷", "/")
+                    .replace("×", "*")
+                    .replace("−", "-")
+                )
+
+                result = eval(clean_expression)
+
                 self.history_manager.save_calculation_to_history(
                     self.expression, result
                 )
@@ -233,9 +259,3 @@ class CalculatorApp:
             self.display_label.config(text=self.expression)
 
         print(f"You clicked: {char}")
-
-
-if __name__ == "__main__":
-    window = tk.Tk()
-    app = CalculatorApp(window)
-    window.mainloop()
