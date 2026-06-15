@@ -1,16 +1,32 @@
 import tkinter as tk
+from tkinter import messagebox
 from FeriCulator.scientific_calculator import ScientificCalculation
+from FeriCulator.history_manager import History
 
 
 class CalculatorApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Feri Culator")
-        self.root.geometry("350x450")
+        self.root.geometry("350x490")
         self.root.resizable(False, False)
 
         self.sci = ScientificCalculation()
+        self.history_manager = History()
         self.is_scientific = False
+
+        self.history_btn = tk.Button(
+            self.root,
+            text="🕒",
+            font=("Arial", 14),
+            bg="#111111",
+            fg="white",
+            relief="flat",
+            activebackground="#222222",
+            activeforeground="white",
+            command=self.show_history_window,
+        )
+        self.history_btn.grid(row=0, column=3, sticky="ne", padx=10, pady=5)
 
         self.display_label = tk.Label(
             self.root,
@@ -21,7 +37,7 @@ class CalculatorApp:
             fg="white",
         )
         self.display_label.grid(
-            row=0, column=0, columnspan=4, sticky="ew", padx=10, pady=20
+            row=1, column=0, columnspan=4, sticky="ew", padx=10, pady=10
         )
         self.root.configure(bg="#111111")
 
@@ -52,15 +68,15 @@ class CalculatorApp:
 
     def toggle_mode(self):
         for widget in self.root.grid_slaves():
-            if int(widget.grid_info()["row"]) > 0:
+            if int(widget.grid_info()["row"]) > 1:
                 widget.destroy()
 
         if self.is_scientific:
-            self.root.geometry("350x470")
+            self.root.geometry("350x490")
             self.is_scientific = False
             self.create_buttons(self.standard_buttons)
         else:
-            self.root.geometry("350x570")
+            self.root.geometry("350x590")
             self.is_scientific = True
             self.create_buttons(self.scientific_buttons)
 
@@ -68,7 +84,7 @@ class CalculatorApp:
         if buttons is None:
             buttons = self.standard_buttons
 
-        row_value = 1
+        row_value = 2
         col_value = 0
 
         for b_text in buttons:
@@ -78,7 +94,7 @@ class CalculatorApp:
                 font=("Arial", 14),
                 width=5,
                 height=2,
-                bg="#222222",
+                bg="#000000",
                 fg="white",
                 relief="flat",
                 command=lambda x=b_text: self.on_button_click(x),
@@ -89,6 +105,64 @@ class CalculatorApp:
             if col_value == 4:
                 col_value = 0
                 row_value += 1
+
+    def show_history_window(self):
+        hs_window = tk.Toplevel(self.root)
+        hs_window.title("Calculation History")
+        hs_window.geometry("320x400")
+        hs_window.configure(bg="#1a1a1a")
+        hs_window.resizable(False, False)
+
+        tk.Label(
+            hs_window,
+            text="History",
+            font=("Arial", 16, "bold"),
+            bg="#1a1a1a",
+            fg="white",
+        ).pack(pady=10)
+
+        hs_text = tk.Text(
+            hs_window,
+            width=30,
+            height=11,
+            bg="#111111",
+            fg="#cccccc",
+            font=("Arial", 14),
+            relief="flat",
+            state="disabled",
+        )
+        hs_text.pack(padx=15, pady=5)
+
+        records = self.history_manager.get_history()
+        hs_text.config(state="normal")
+        if not records:
+            hs_text.insert("1.0", "\n  No history found.")
+        else:
+            for item in records:
+                line = f" {item['expression']} = {item['result']}\n ───────\n"
+                hs_text.insert("end", line)
+        hs_text.config(state="disabled")
+
+        def clear_action():
+            if messagebox.askyesno(
+                "Clear History", "Do you want to clear history?", parent=hs_window
+            ):
+                self.history_manager.clear_history()
+                hs_text.config(state="normal")
+                hs_text.delete("1.0", "end")
+                hs_text.insert("1.0", "\n  No history found.")
+                hs_text.config(state="disabled")
+
+        clear_btn = tk.Button(
+            hs_window,
+            text="Clear History",
+            font=("Arial", 11, "bold"),
+            bg="#d9534f",
+            fg="white",
+            relief="flat",
+            command=clear_action,
+        )
+        clear_btn.pack(pady=10, fill="x", padx=15)
 
     def on_button_click(self, char):
         # Case 1: Clear the entire expression and reset display
@@ -107,44 +181,26 @@ class CalculatorApp:
 
         # Case 3: Handle scientific calculator operations
         elif char in ["sin", "cos", "tan", "cot", "fac", "π", "log", "√"]:
-
             if char == "π":
                 result = self.sci.calculate_pi()
                 self.expression = str(result)
                 self.display_label.config(text=self.expression)
                 return
 
-            # Ignore scientific operations if no input exists
-            if not self.expression and char != "π":
+            if not self.expression:
                 return
 
             try:
                 num = float(self.expression)
+                op_name = "sqrt" if char == "√" else char
 
-                if char == "sin":
-                    result = self.sci.calculate_sin(num)
+                result = self.sci.calculate(op_name, self.expression)
 
-                elif char == "cos":
-                    result = self.sci.calculate_cos(num)
-
-                elif char == "tan":
-                    result = self.sci.calculate_tan(num)
-
-                elif char == "cot":
-                    result = self.sci.calculate_cot(num)
-
-                elif char == "fac":
-                    result = self.sci.calculate_factorial(int(num))
-
-                elif char == "log":
-                    result = self.sci.calculate_log(num)
-
-                elif char == "√":
-                    result = self.sci.calculate_sqrt(num)
-
-                # Update calculator state and display result
-                self.expression = str(result)
-                self.display_label.config(text=self.expression)
+                self.history_manager.save_calculation_to_history(
+                    f"{char}({num})", result
+                )
+                self.expression = str(result) if result != "Math Error" else ""
+                self.display_label.config(text=str(result))
 
             except ValueError:
                 self.display_label.config(text="Error")
@@ -152,8 +208,14 @@ class CalculatorApp:
 
         # Case 4: Evaluate the mathematical expression
         elif char == "=":
+            if not self.expression:
+                return
             try:
                 result = eval(self.expression)
+                self.history_manager.save_calculation_to_history(
+                    self.expression, result
+                )
+
                 self.expression = str(result)
                 self.display_label.config(text=self.expression)
 
@@ -162,10 +224,7 @@ class CalculatorApp:
                 self.expression = ""
 
         # Case 5: Switch between standard and scientific modes
-        elif char == "SCI":
-            self.toggle_mode()
-
-        elif char == "STD":
+        elif char in ["SCI", "STD"]:
             self.toggle_mode()
 
         # Case 6: Append numbers and operators to the expression
