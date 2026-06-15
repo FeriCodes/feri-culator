@@ -13,20 +13,21 @@ class History:
     Handles calculation history management, including saving, viewing, and clearing history records.
     """
 
-    def __init__(self, filename="CalHistory.json"):
+    def __init__(self, filename="CalHistory.json", max_records=50):
         self.filename = filename
+        self.max_records = max_records
 
-    def view_history(self):
+    def get_history(self):
         """
-        2- choice 2 in main menu for display calculation history.
+        Retrieves the calculation history from the JSON file.
         """
-        print("\n--- Calculation History ---")
-        history = self.get_history()
-        if not history:
-            print("No history found.")
-        else:
-            for item in history:
-                print(f"[{item['time']}] {item['expression']} = {item['result']}")
+        if not os.path.exists(self.filename):
+            return []
+        try:
+            with open(self.filename, "r", encoding="utf-8") as file:
+                return json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []  # if don't have a file return an empty list.
 
     def save_calculation_to_history(self, expression, result):
         """
@@ -43,23 +44,14 @@ class History:
 
         history.append(new_record)
 
+        if len(history) > self.max_records:
+            history = history[-self.max_records :]
+
         try:
             with open(self.filename, "w", encoding="utf-8") as file:
                 json.dump(history, file, indent=4, ensure_ascii=False)
         except IOError:
             print("Error: Could not write to history file.")
-
-    def get_history(self):
-        """
-        Retrieves the calculation history from the JSON file.
-        """
-        if not os.path.exists(self.filename):
-            return []
-        try:
-            with open(self.filename, "r", encoding="utf-8") as file:
-                return json.load(file)
-        except (FileNotFoundError, json.JSONDecodeError):
-            return []  # if don't have a file return an empty list.
 
     def clear_history(self):
         """
@@ -70,16 +62,3 @@ class History:
                 json.dump([], file)
         except IOError:
             print("Error: Could not clear history file.")
-
-    def confirm_and_clear(self):
-        """
-        choice 3 in main manu for getting clear history.
-        """
-
-        confirm = input("Do you want to clear history? (y/n):").strip().lower()
-        if confirm != "y":
-            print("Operation cancelled.")
-            return
-
-        self.clear_history_file()
-        print("History cleared!")
