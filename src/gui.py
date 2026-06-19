@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
-from FeriCulator.scientific_calculator import ScientificCalculation
-from FeriCulator.history_manager import History
+from src.scientific_calculator import ScientificCalculation
+from src.history_manager import History
 
 
 class CalculatorApp:

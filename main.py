@@ -4,7 +4,7 @@ Main entry point of the application launching the GUI interface.
 """
 
 import tkinter as tk
-from FeriCulator.gui import CalculatorApp
+from src.gui import CalculatorApp
 
 
 def main():
