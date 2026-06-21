@@ -3,7 +3,7 @@ FeriCulator: A scientific calculator with history management.
 Main entry point of the application launching the GUI interface.
 """
 
-import tkinter as tk
+import customtkinter as ctk
 from src.gui import CalculatorApp
 
 
@@ -11,7 +11,7 @@ def main():
     """
     Initializes the main Tkinter window and starts the CalculatorApp.
     """
-    root = tk.Tk()
+    root = ctk.CTk()
     _ = CalculatorApp(root)
     root.mainloop()
 

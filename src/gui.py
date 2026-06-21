@@ -1,4 +1,4 @@
-import tkinter as tk
+import customtkinter as ctk
 from tkinter import messagebox
 from src.scientific_calculator import ScientificCalculation
 from src.history_manager import History
@@ -11,32 +11,34 @@ class CalculatorApp:
         self.root.title("Feri Culator")
         self.root.geometry("350x490")
         self.root.resizable(False, False)
-        self.root.configure(bg="#111111")
+        self.root.configure(fg_color="#171717")  # Updated to Xiaomi dark background
 
         self.sci = ScientificCalculation()
         self.history_manager = History()
         self.is_scientific = False
 
-        self.history_btn = tk.Button(
+        self.history_btn = ctk.CTkButton(
             self.root,
             text="🕒",
-            font=("Arial", 14),
-            bg="#111111",
-            fg="white",
-            relief="flat",
-            activebackground="#222222",
-            activeforeground="white",
+            font=("Arial", 16, "bold"),
             command=self.show_history_window,
+            fg_color="#171717",  # Blend with background
+            hover_color="#2a2a2a",
+            text_color="#ff9f0a",
+            width=40,
+            height=40,
         )
         self.history_btn.grid(row=0, column=3, sticky="ne", padx=10, pady=5)
 
-        self.display_label = tk.Label(
+        self.display_label = ctk.CTkLabel(
             self.root,
             text="0",
-            font=("Arial", 24),
+            font=("Arial", 32),
             anchor="e",
-            bg="#111111",
-            fg="white",
+            fg_color="#171717",  # Consistent Xiaomi background
+            text_color="white",
+            width=320,
+            height=60,
         )
         self.display_label.grid(
             row=1, column=0, columnspan=4, sticky="ew", padx=10, pady=10
@@ -62,7 +64,6 @@ class CalculatorApp:
         ]
         # fmt: on
 
-        # self.expression stores the current mathematical formula as a string
         self.expression = ""
         self.create_buttons()
 
@@ -76,7 +77,7 @@ class CalculatorApp:
             self.is_scientific = False
             self.create_buttons(self.standard_buttons)
         else:
-            self.root.geometry("350x590")
+            self.root.geometry("350x630")
             self.is_scientific = True
             self.create_buttons(self.scientific_buttons)
 
@@ -88,29 +89,41 @@ class CalculatorApp:
         col_value = 0
 
         for b_text in buttons:
+
             button_bg = "#222222"
-            button_fg = "white"
+            button_fg = "#FFFFFF"
+            hover_color = "#333333"
 
             if b_text in ["AC", "C", "%"]:
+                button_bg = "#171717"
                 button_fg = "#ff9f0a"
+                hover_color = "#2a2a2a"
 
-            elif b_text in ["÷", "×", "−", "+", "=", "SCI", "STD"]:
+            elif b_text in ["÷", "×", "−", "+", "SCI", "STD"]:
+                button_bg = "#171717"
                 button_fg = "#ff9f0a"
+                hover_color = "#2a2a2a"
+
+            elif b_text == "=":
+                button_bg = "#ff9f0a"
+                button_fg = "#FFFFFF"
+                hover_color = "#cc7f00"
 
             elif b_text in ["sin", "cos", "tan", "cot", "fac", "π", "√", "log"]:
+                button_bg = "#171717"
                 button_fg = "#64ffda"
+                hover_color = "#2a2a2a"
 
-            btn = tk.Button(
+            btn = ctk.CTkButton(
                 self.root,
                 text=b_text,
-                font=("Arial", 14, "bold"),
-                width=5,
-                height=2,
-                bg=button_bg,
-                fg=button_fg,
-                relief="flat",
-                activebackground="#333333",
-                activeforeground=button_fg,
+                font=("Arial", 21, "bold"),
+                fg_color=button_bg,
+                text_color=button_fg,
+                hover_color=hover_color,
+                width=75,
+                height=60,
+                corner_radius=10,
                 command=lambda x=b_text: self.on_button_click(x),
             )
             btn.grid(row=row_value, column=col_value, padx=5, pady=5)
@@ -121,41 +134,41 @@ class CalculatorApp:
                 row_value += 1
 
     def show_history_window(self):
-        hs_window = tk.Toplevel(self.root)
+        hs_window = ctk.CTkToplevel(self.root)
         hs_window.title("Calculation History")
         hs_window.geometry("320x400")
-        hs_window.configure(bg="#1a1a1a")
+        hs_window.configure(fg_color="#171717")
+
         hs_window.resizable(False, False)
 
-        tk.Label(
-            hs_window,
-            text="History",
-            font=("Arial", 16, "bold"),
-            bg="#1a1a1a",
-            fg="white",
+        hs_window.attributes("-topmost", True)
+        hs_window.transient(self.root)
+        hs_window.lift()
+        hs_window.focus_force()
+
+        ctk.CTkLabel(
+            hs_window, text="History", font=("Arial", 16, "bold"), text_color="#FFFFFF"
         ).pack(pady=10)
 
-        hs_text = tk.Text(
+        hs_text = ctk.CTkTextbox(
             hs_window,
-            width=30,
-            height=11,
-            bg="#111111",
-            fg="#cccccc",
-            font=("Arial", 14),
-            relief="flat",
-            state="disabled",
+            width=280,
+            height=250,
+            font=("Arial", 18),
+            fg_color="#000000",
+            text_color="#FFFFFF",
         )
         hs_text.pack(padx=15, pady=5)
 
         records = self.history_manager.get_history()
-        hs_text.config(state="normal")
+        hs_text.configure(state="normal")
         if not records:
             hs_text.insert("1.0", "\n  No history found.")
         else:
             for item in records:
-                line = f" {item['expression']} = {item['result']}\n ───────\n"
+                line = f" {item['expression']} = {item['result']}\n ───-----\n"
                 hs_text.insert("end", line)
-        hs_text.config(state="disabled")
+        hs_text.configure(state="disabled")
 
         def clear_action():
             if messagebox.askyesno(
@@ -164,43 +177,40 @@ class CalculatorApp:
                 parent=hs_window,
             ):
                 self.history_manager.clear_history()
-                hs_text.config(state="normal")
+                hs_text.configure(state="normal")
                 hs_text.delete("1.0", "end")
                 hs_text.insert("1.0", "\n  No history found.")
-                hs_text.config(state="disabled")
+                hs_text.configure(state="disabled")
 
-        clear_btn = tk.Button(
+        clear_btn = ctk.CTkButton(
             hs_window,
             text="Clear History",
             font=("Arial", 11, "bold"),
-            bg="#d9534f",
-            fg="white",
-            relief="flat",
             command=clear_action,
+            fg_color="#ff9f0a",
+            hover_color="#cc7f00",
+            width=30,
+            height=30,
         )
         clear_btn.pack(pady=10, fill="x", padx=15)
 
     def on_button_click(self, char):
-        # Case 1: Clear the entire expression and reset display
         if char == "AC":
             self.expression = ""
             self.display_label.configure(text="0")
 
-        # Case 2: Delete the last entered character (Backspace)
         elif char == "C":
             self.expression = self.expression[:-1]
-
             if self.expression == "":
-                self.display_label.config(text="0")
+                self.display_label.configure(text="0")
             else:
-                self.display_label.config(text=self.expression)
+                self.display_label.configure(text=self.expression)
 
-        # Case 3: Handle scientific calculator operations
         elif char in ["sin", "cos", "tan", "cot", "fac", "π", "log", "√"]:
             if char == "π":
                 result = self.sci.calculate_pi()
                 self.expression = str(result)
-                self.display_label.config(text=self.expression)
+                self.display_label.configure(text=self.expression)
                 return
 
             if not self.expression:
@@ -219,13 +229,12 @@ class CalculatorApp:
                 else:
                     self.expression = ""
 
-                self.display_label.config(text=str(result))
+                self.display_label.configure(text=str(result))
 
             except ValueError:
-                self.display_label.config(text="Error")
+                self.display_label.configure(text="Error")
                 self.expression = ""
 
-        # Case 4: Evaluate the mathematical expression
         elif char == "=":
             if not self.expression:
                 return
@@ -243,19 +252,15 @@ class CalculatorApp:
                 )
 
                 self.expression = str(result)
-                self.display_label.config(text=self.expression)
+                self.display_label.configure(text=self.expression)
 
             except Exception:
-                self.display_label.config(text="Error")
+                self.display_label.configure(text="Error")
                 self.expression = ""
 
-        # Case 5: Switch between standard and scientific modes
         elif char in ["SCI", "STD"]:
             self.toggle_mode()
 
-        # Case 6: Append numbers and operators to the expression
         else:
             self.expression += char
-            self.display_label.config(text=self.expression)
-
-        print(f"You clicked: {char}")
+            self.display_label.configure(text=self.expression)
