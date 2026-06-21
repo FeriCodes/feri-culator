@@ -20,7 +20,7 @@ class CalculatorApp:
         self.history_btn = ctk.CTkButton(
             self.root,
             text="🕒",
-            font=("Arial", 14),
+            font=("Arial", 16, "bold"),
             command=self.show_history_window,
             fg_color="#171717",  # Blend with background
             hover_color="#2a2a2a",
@@ -166,7 +166,7 @@ class CalculatorApp:
             hs_text.insert("1.0", "\n  No history found.")
         else:
             for item in records:
-                line = f" {item['expression']} = {item['result']}\n --------\n"
+                line = f" {item['expression']} = {item['result']}\n ───-----\n"
                 hs_text.insert("end", line)
         hs_text.configure(state="disabled")
 
