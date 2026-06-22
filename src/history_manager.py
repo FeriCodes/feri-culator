@@ -17,7 +17,7 @@ class History:
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
 
-        self.filename = os.path.join(base_dir, filename)
+        self.filename = os.path.join(base_dir, "..", filename)
         self.max_records = max_records
 
     def get_history(self):
