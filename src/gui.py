@@ -1,28 +1,36 @@
 import customtkinter as ctk
 from tkinter import messagebox
+from src.handlers import Handlers
 from src.scientific_calculator import ScientificCalculation
 from src.history_manager import History
 
 
 class CalculatorApp:
+    """
+    The main GUI class for the FeriCulator application.
+     - Initializes the main window and its widgets.
+    """
 
     def __init__(self, root):
         self.root = root
         self.root.title("Feri Culator")
         self.root.geometry("350x490")
         self.root.resizable(False, False)
-        self.root.configure(fg_color="#171717")  # Updated to Xiaomi dark background
+        self.root.configure(fg_color="#171717")
 
+        # Initialize the scientific calculator and history manager
         self.sci = ScientificCalculation()
         self.history_manager = History()
-        self.is_scientific = False
+
+        # the key for accessing the handlers of the buttons and other widgets in the GUI.
+        self.handlers = Handlers(self)
 
         self.history_btn = ctk.CTkButton(
             self.root,
             text="🕒",
             font=("Arial", 16, "bold"),
             command=self.show_history_window,
-            fg_color="#171717",  # Blend with background
+            fg_color="#171717",
             hover_color="#2a2a2a",
             text_color="#ff9f0a",
             width=40,
@@ -35,7 +43,7 @@ class CalculatorApp:
             text="0",
             font=("Arial", 32),
             anchor="e",
-            fg_color="#171717",  # Consistent Xiaomi background
+            fg_color="#171717",
             text_color="white",
             width=320,
             height=60,
@@ -64,22 +72,7 @@ class CalculatorApp:
         ]
         # fmt: on
 
-        self.expression = ""
         self.create_buttons()
-
-    def toggle_mode(self):
-        for widget in self.root.grid_slaves():
-            if int(widget.grid_info()["row"]) > 1:
-                widget.destroy()
-
-        if self.is_scientific:
-            self.root.geometry("350x490")
-            self.is_scientific = False
-            self.create_buttons(self.standard_buttons)
-        else:
-            self.root.geometry("350x630")
-            self.is_scientific = True
-            self.create_buttons(self.scientific_buttons)
 
     def create_buttons(self, buttons=None):
         if buttons is None:
@@ -124,7 +117,7 @@ class CalculatorApp:
                 width=75,
                 height=60,
                 corner_radius=10,
-                command=lambda x=b_text: self.on_button_click(x),
+                command=lambda x=b_text: self.handlers.on_button_click(x),
             )
             btn.grid(row=row_value, column=col_value, padx=5, pady=5)
             col_value += 1
@@ -185,7 +178,7 @@ class CalculatorApp:
         clear_btn = ctk.CTkButton(
             hs_window,
             text="Clear History",
-            font=("Arial", 11, "bold"),
+            font=("Arial", 14, "bold"),
             command=clear_action,
             fg_color="#ff9f0a",
             hover_color="#cc7f00",
@@ -193,74 +186,3 @@ class CalculatorApp:
             height=30,
         )
         clear_btn.pack(pady=10, fill="x", padx=15)
-
-    def on_button_click(self, char):
-        if char == "AC":
-            self.expression = ""
-            self.display_label.configure(text="0")
-
-        elif char == "C":
-            self.expression = self.expression[:-1]
-            if self.expression == "":
-                self.display_label.configure(text="0")
-            else:
-                self.display_label.configure(text=self.expression)
-
-        elif char in ["sin", "cos", "tan", "cot", "fac", "π", "log", "√"]:
-            if char == "π":
-                result = self.sci.calculate_pi()
-                self.expression = str(result)
-                self.display_label.configure(text=self.expression)
-                return
-
-            if not self.expression:
-                return
-
-            try:
-                num = float(self.expression)
-                op_name = "sqrt" if char == "√" else char
-                result = self.sci.calculate(op_name, self.expression)
-
-                if result != "Math Error":
-                    self.history_manager.save_calculation_to_history(
-                        f"{char}({num})", result
-                    )
-                    self.expression = str(result)
-                else:
-                    self.expression = ""
-
-                self.display_label.configure(text=str(result))
-
-            except ValueError:
-                self.display_label.configure(text="Error")
-                self.expression = ""
-
-        elif char == "=":
-            if not self.expression:
-                return
-            try:
-                clean_expression = (
-                    self.expression.replace("÷", "/")
-                    .replace("×", "*")
-                    .replace("−", "-")
-                )
-
-                result = eval(clean_expression)
-
-                self.history_manager.save_calculation_to_history(
-                    self.expression, result
-                )
-
-                self.expression = str(result)
-                self.display_label.configure(text=self.expression)
-
-            except Exception:
-                self.display_label.configure(text="Error")
-                self.expression = ""
-
-        elif char in ["SCI", "STD"]:
-            self.toggle_mode()
-
-        else:
-            self.expression += char
-            self.display_label.configure(text=self.expression)
