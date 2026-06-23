@@ -25,18 +25,12 @@ class Handlers:
         return val_str
 
     def toggle_mode(self):
-        for widget in self.app.root.grid_slaves():
-            if int(widget.grid_info()["row"]) > 1:
-                widget.destroy()
+        """
+        Toggles the internal state and requests the GUI to update its layout.
+        """
+        self.is_scientific = not self.is_scientific
 
-        if self.is_scientific:
-            self.app.root.geometry("350x490")
-            self.is_scientific = False
-            self.app.create_buttons(self.app.standard_buttons)
-        else:
-            self.app.root.geometry("350x630")
-            self.is_scientific = True
-            self.app.create_buttons(self.app.scientific_buttons)
+        self.app.update_gui_mode(self.is_scientific)
 
     def on_button_click(self, char):
         """

@@ -74,6 +74,22 @@ class CalculatorApp:
 
         self.create_buttons()
 
+    def update_gui_mode(self, is_scientific):
+        """
+        Handles all UI changes for switching between Standard and Scientific modes.
+        """
+
+        for widget in self.root.grid_slaves():
+            if int(widget.grid_info()["row"]) > 1:
+                widget.destroy()
+
+        if is_scientific:
+            self.root.geometry("350x630")
+            self.create_buttons(self.scientific_buttons)
+        else:
+            self.root.geometry("350x490")
+            self.create_buttons(self.standard_buttons)
+
     def create_buttons(self, buttons=None):
         if buttons is None:
             buttons = self.standard_buttons
