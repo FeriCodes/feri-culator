@@ -10,6 +10,20 @@ class Handlers:
         self.is_scientific = False
         self.expression = ""
 
+    def format_display(self, value):
+        """
+        Formats the value to fit inside the display without breaking the GUI.
+        """
+        val_str = str(value)
+
+        if len(val_str) > 12:
+            try:
+
+                return f"{float(value):.5e}"
+            except ValueError:
+                return val_str[:12]
+        return val_str
+
     def toggle_mode(self):
         for widget in self.app.root.grid_slaves():
             if int(widget.grid_info()["row"]) > 1:
@@ -25,6 +39,9 @@ class Handlers:
             self.app.create_buttons(self.app.scientific_buttons)
 
     def on_button_click(self, char):
+        """
+        Handles the button click events and updates the display accordingly.
+        """
         if char == "AC":
             self.expression = ""
             self.app.display_label.configure(text="0")
@@ -34,13 +51,16 @@ class Handlers:
             if self.expression == "":
                 self.app.display_label.configure(text="0")
             else:
-                self.app.display_label.configure(text=self.expression)
+                formatted_text = self.format_display(self.expression)
+                self.app.display_label.configure(text=formatted_text)
 
         elif char in ["sin", "cos", "tan", "cot", "fac", "π", "log", "√"]:
             if char == "π":
                 result = self.app.sci.calculate_pi()
                 self.expression = str(result)
-                self.app.display_label.configure(text=self.expression)
+
+                formatted_text = self.format_display(self.expression)
+                self.app.display_label.configure(text=formatted_text)
                 return
 
             if not self.expression:
@@ -52,6 +72,11 @@ class Handlers:
                 result = self.app.sci.calculate(op_name, self.expression)
 
                 if result != "Math Error":
+                    if isinstance(result, float):
+                        result = round(result, 10)
+                        if result.is_integer():
+                            result = int(result)
+
                     self.app.history_manager.save_calculation_to_history(
                         f"{char}({num})", result
                     )
@@ -59,7 +84,8 @@ class Handlers:
                 else:
                     self.expression = ""
 
-                self.app.display_label.configure(text=str(result))
+                formatted_text = self.format_display(result)
+                self.app.display_label.configure(text=formatted_text)
 
             except ValueError:
                 self.app.display_label.configure(text="Error")
@@ -77,12 +103,19 @@ class Handlers:
 
                 result = eval(clean_expression)
 
+                if isinstance(result, float):
+                    result = round(result, 10)
+                    if result.is_integer():
+                        result = int(result)
+
                 self.app.history_manager.save_calculation_to_history(
                     self.expression, result
                 )
 
                 self.expression = str(result)
-                self.app.display_label.configure(text=self.expression)
+
+                formatted_text = self.format_display(self.expression)
+                self.app.display_label.configure(text=formatted_text)
 
             except Exception:
                 self.app.display_label.configure(text="Error")
@@ -93,4 +126,6 @@ class Handlers:
 
         else:
             self.expression += char
-            self.app.display_label.configure(text=self.expression)
+
+            formatted_text = self.format_display(self.expression)
+            self.app.display_label.configure(text=formatted_text)
